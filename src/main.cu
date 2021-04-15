@@ -102,21 +102,21 @@ int main(int argc, char **argv)
     printf("Stride: %d\n", stride);
     printf("Number of iterations: %d of max %d points\n\n", nIter, maxShmemSize);
 
-    /* -- CPU -- */
-    printf("Executing on CPU...\n");
-
-    cpuStartTime = clock();
-    
-    if (sequentialIDW(knownPoints, queryPoints, zValues, KN, QN, searchRadius) < 0)
-    {
-        printf("Search radius is too small! Some values cannot be interpolated!\nYou need more dataset points or a different search radius!\n");
-        exit(-1);
-    }
-    
-    cpuElapsedTime = ((float)(clock() - cpuStartTime))/CLOCKS_PER_SEC;
-    
-    printf("Elapsed CPU time : %f s\n" ,cpuElapsedTime);
-    /* --- END --- */
+//    /* -- CPU -- */
+//    printf("Executing on CPU...\n");
+//
+//    cpuStartTime = clock();
+//
+//    if (sequentialIDW(knownPoints, queryPoints, zValues, KN, QN, searchRadius) < 0)
+//    {
+//        printf("Search radius is too small! Some values cannot be interpolated!\nYou need more dataset points or a different search radius!\n");
+//        exit(-1);
+//    }
+//
+//    cpuElapsedTime = ((float)(clock() - cpuStartTime))/CLOCKS_PER_SEC;
+//
+//    printf("Elapsed CPU time : %f s\n" ,cpuElapsedTime);
+//    /* --- END --- */
 
     /* -- GPU -- */
     printf("\nExecuting on GPU...\n");
@@ -124,12 +124,12 @@ int main(int argc, char **argv)
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
     cudaEventRecord(start,0);
-    
+
     cudaMemcpy(devKP, knownPoints, sizeKP, cudaMemcpyHostToDevice);
     cudaMemcpy(devQP, queryPoints, sizeQP, cudaMemcpyHostToDevice);
 
     parallelIDW<<<nBlocks,nThreadsForBlock,shMemSize>>>(devKP, devQP, devZV, KN, QN, stride, nIter, maxShmemSize, searchRadius);
-    
+
     cudaMemcpy(zValuesGPU, devZV, QN*sizeof(float), cudaMemcpyDeviceToHost);
 
     cudaEventRecord(stop,0);
